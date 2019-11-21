@@ -50,4 +50,9 @@ menu "LPC54110 Bsp Config"
             bool "Enable SPH0641LU4H"
             default y
         endif
+    
+    config BSP_USING_PCT2705
+        bool "Enable pct2705 read demo"
+        select BSP_USING_I2C4
+        default n
 endmenu
