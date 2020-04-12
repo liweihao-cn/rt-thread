@@ -205,7 +205,7 @@ static rt_err_t drv_pwm_get(TIM_HandleTypeDef *htim, struct rt_pwm_configuration
         tim_clock = HAL_RCC_GetPCLK1Freq() * 2;
 #endif
     }
-    
+
     if (__HAL_TIM_GET_CLOCKDIVISION(htim) == TIM_CLOCKDIVISION_DIV2)
     {
         tim_clock = tim_clock / 2;
@@ -330,13 +330,6 @@ static rt_err_t stm32_hw_pwm_init(struct stm32_pwm *device)
         goto __exit;
     }
 
-    if (HAL_TIM_Base_Init(tim) != HAL_OK)
-    {
-        LOG_E("%s time base init failed", device->name);
-        result = -RT_ERROR;
-        goto __exit;
-    }
-
     clock_config.ClockSource = TIM_CLOCKSOURCE_INTERNAL;
     if (HAL_TIM_ConfigClockSource(tim, &clock_config) != HAL_OK)
     {
@@ -358,6 +351,8 @@ static rt_err_t stm32_hw_pwm_init(struct stm32_pwm *device)
     oc_config.Pulse = 0;
     oc_config.OCPolarity = TIM_OCPOLARITY_HIGH;
     oc_config.OCFastMode = TIM_OCFAST_DISABLE;
+    oc_config.OCNIdleState = TIM_OCNIDLESTATE_RESET;
+    oc_config.OCIdleState  = TIM_OCIDLESTATE_RESET;
 
     /* config pwm channel */
     if (device->channel & 0x01)
@@ -551,7 +546,6 @@ static int stm32_pwm_init(void)
             /* register pwm device */
             if (rt_device_pwm_register(&stm32_pwm_obj[i].pwm_device, stm32_pwm_obj[i].name, &drv_ops, &stm32_pwm_obj[i].tim_handle) == RT_EOK)
             {
-
                 LOG_D("%s register success", stm32_pwm_obj[i].name);
             }
             else
